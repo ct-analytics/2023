@@ -1,4 +1,5 @@
 import re
+import math
 
 f = "day 2/day2.txt"
 # Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
@@ -47,8 +48,12 @@ with open(f,'r') as games:
         game['check'] = check(game['cube_maxes'])
         # print(f"{i}: {game}")
 
+        game['power'] = math.prod([v for k,v in game['cube_maxes'].items()])
+
         all_games.append(game)
 
 # print(all_games)
 print(f"Number of games that are possible: {sum(1 for g in all_games if g['check'])}")
 print(f"Sum of IDs: {sum(g['number'] for g in all_games if g['check'])}")
+
+print(f"Sum of the power of these sets: {sum(g['power'] for g in all_games)}")
