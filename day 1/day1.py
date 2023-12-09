@@ -1,6 +1,6 @@
 import re
 
-f = "day1.txt"
+f = "day 1/day1.txt"
 
 calibration_values = []
 digits = {'one':'1',
