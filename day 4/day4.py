@@ -10,11 +10,10 @@ with open(f,'r') as scratchcards:
     for i, l in enumerate(scratchcards):
         s = re.split(r'Card\s+(\d+):',l)
         c = [x.split("|") for x in s]
-        # print(c)
+        
         card = {'n': int(c[1][0]), 'numbers': c[2]}
         card_counter.update([card['n']])
-        # print(f'{i}: {card}')
-
+        
         card['winning numbers'] = set([int(x) for x in card['numbers'][0].strip().split(' ') if x != ''])
         card['elf numbers'] = set([int(x) for x in card['numbers'][1].strip().split(' ') if x != ''])
         card['intersection'] = card['winning numbers'].intersection(card['elf numbers'])
@@ -26,10 +25,9 @@ with open(f,'r') as scratchcards:
             card['score'] = 2**(card['len of intersection']-1)
         else:
             card['score'] = 0
-        # print(f'{i}: {card}')
+        
         all_cards.append(card)
-        # print(f'{i}: {card_counter}')
-
+        
 
 print(f"Point total: {sum(card['score'] for card in all_cards)}")
 print(f"Total cards won: {sum(card_counter.values())}")
