@@ -1,160 +1,59 @@
 import re
 
-f = 'day 5/day5.txt'
-seed_to_soil = {'flag':False, 'mapping':dict()}
-soil_to_fertilizer = {'flag':False, 'mapping':dict()}
-fertilizer_to_water = {'flag':False, 'mapping':dict()}
-water_to_light = {'flag':False, 'mapping':dict()}
-light_to_temperature = {'flag':False, 'mapping':dict()}
-temperature_to_humidity = {'flag':False, 'mapping':dict()}
-humidity_to_location = {'flag':False, 'mapping':dict()}
+with open('day 5/day5.txt', 'r') as f:
+    almanac = f.read()
 
+lines = almanac.split('\n\n')
+seeds = re.findall(r'\d+', lines[0])
+print(seeds)
 
-with open(f,'r') as almanac:
-    for i, l in enumerate(almanac):
-        # print(f"{i}: {l}")
-        if l[0] == '\n':
-            seed_to_soil['flag'] = False
-            soil_to_fertilizer['flag'] = False
-            fertilizer_to_water['flag'] = False
-            water_to_light['flag'] = False
-            light_to_temperature['flag'] = False
-            temperature_to_humidity['flag'] = False
-            humidity_to_location['flag'] = False
-            continue
-
-        if l[0:5] == "seeds":
-            k = [int(x) for x in l[7:].split(' ')]
-            v = [dict() for x in k]
-            seeds = dict(zip(k,v))
-
-        if l.strip() == 'seed-to-soil map:':
-            seed_to_soil['flag'] = True
-            # print('Seed to Soil mapping calculation...')
-            continue
-
-        if l.strip() == 'soil-to-fertilizer map:':
-            soil_to_fertilizer['flag'] = True
-            # print('Soil to Fertilizer mapping calculation...')
-            continue
-
-        if l.strip() == 'fertilizer-to-water map:':
-            fertilizer_to_water['flag'] = True
-            # print('Fertilizer to Water mapping calculation...')
-            continue
-
-        if l.strip() == 'water-to-light map:':
-            water_to_light['flag'] = True
-            # print('Water to Light mapping calculation...')
-            continue
-
-        if l.strip() == 'light-to-temperature map:':
-            light_to_temperature['flag'] = True
-            # print('Light to Temperature mapping calculation...')
-            continue
-
-        if l.strip() == 'temperature-to-humidity map:':
-            temperature_to_humidity['flag'] = True
-            # print('Temperature to Humidity mapping calculation...')
-            continue
-
-        if l.strip() == 'humidity-to-location map:':
-            humidity_to_location['flag'] = True
-            # print('Humidity to Location mapping calculation...')
-            continue
-
-        if seed_to_soil['flag']:
-            # print(l.split(' '))
-            seed_to_soil['map'] = [int(x) for x in l.split(' ')]
+min_location = float('inf')
+for x in map(int, seeds):
+    # print(f"Seed: {x}")
+    for l in lines[1:]:
+        for conversion in re.findall(r'(\d+) (\d+) (\d+)', l):
+            destination, source, delta = map(int, conversion)
             
-            for i in range(seed_to_soil['map'][2]):
-                seed_to_soil['mapping'][seed_to_soil['map'][1]+i] = seed_to_soil['map'][0]+i
+            if x in range(source, source + delta):
+                x += destination - source
+                break
 
-            # print('Seed to Soil mapping completed.')
+    # print(f"Location: {x}")
+    min_location = min(x, min_location)
 
-        if soil_to_fertilizer['flag']:
-            # print(l.split(' '))
-            soil_to_fertilizer['map'] = [int(x) for x in l.split(' ')]
-            
-            for i in range(soil_to_fertilizer['map'][2]):
-                soil_to_fertilizer['mapping'][soil_to_fertilizer['map'][1]+i] = soil_to_fertilizer['map'][0]+i
+print(f"Lowest location is {min_location}")
 
-            # print('Soil to Fertilizer mapping completed.')
+intervals = []
 
-        if fertilizer_to_water['flag']:
-            # print(l.split(' '))
-            fertilizer_to_water['map'] = [int(x) for x in l.split(' ')]
-            
-            for i in range(fertilizer_to_water['map'][2]):
-                fertilizer_to_water['mapping'][fertilizer_to_water['map'][1]+i] = fertilizer_to_water['map'][0]+i
+for seed in re.findall(r'(\d+) (\d+)', lines[0]):
+    x1, dx = map(int, seed)
+    x2 = x1 + dx
+    intervals.append((x1, x2, 1))
 
-            # print('Fertilizer to Water mapping completed.')
-            
-        if water_to_light['flag']:
-            # print(l.split(' '))
-            water_to_light['map'] = [int(x) for x in l.split(' ')]
-            
-            for i in range(water_to_light['map'][2]):
-                water_to_light['mapping'][water_to_light['map'][1]+i] = water_to_light['map'][0]+i
+min_location = float('inf')
+while intervals:
+    x1, x2, level = intervals.pop()
+    if level == 8:
+        min_location = min(x1, min_location)
+        continue
 
-            # print('Water to Light mapping completed.')
+    for conversion in re.findall(r'(\d+) (\d+) (\d+)', lines[level]):
+        z, y1, dy = map(int, conversion)
+        y2 = y1 + dy
+        diff = z - y1
+        if x2 <= y1 or y2 <= x1:    # no overlap
+            continue
+        if x1 < y1:                 # split original interval at y1
+            intervals.append((x1, y1, level))
+            x1 = y1
+        if y2 < x2:                 # split original interval at y2
+            intervals.append((y2, x2, level))
+            x2 = y2
+        intervals.append((x1 + diff, x2 + diff, level + 1)) # perfect overlap -> make conversion and let pass to next nevel 
+        break
 
-        if light_to_temperature['flag']:
-            # print(l.split(' '))
-            light_to_temperature['map'] = [int(x) for x in l.split(' ')]
-            
-            for i in range(light_to_temperature['map'][2]):
-                light_to_temperature['mapping'][light_to_temperature['map'][1]+i] = light_to_temperature['map'][0]+i
-
-            # print('Light to Temperature mapping completed.')
-
-        if temperature_to_humidity['flag']:
-            # print(l.split(' '))
-            temperature_to_humidity['map'] = [int(x) for x in l.split(' ')]
-            
-            for i in range(temperature_to_humidity['map'][2]):
-                temperature_to_humidity['mapping'][temperature_to_humidity['map'][1]+i] = temperature_to_humidity['map'][0]+i
-
-            # print('Temperature to Humidity mapping completed.')
-
-        if humidity_to_location['flag']:
-            # print(l.split(' '))
-            humidity_to_location['map'] = [int(x) for x in l.split(' ')]
-            
-            for i in range(humidity_to_location['map'][2]):
-                humidity_to_location['mapping'][humidity_to_location['map'][1]+i] = humidity_to_location['map'][0]+i
-
-            # print('Humidity to Location mapping completed.')
-        
-print(f"Seeds: {seeds}")
-print(f"Seed to soil: {seed_to_soil}")
-print(f"Soil to ferilizer: {soil_to_fertilizer}")
-print(f"Fertilizer to water: {fertilizer_to_water}")
-print(f"Water to light: {water_to_light}")
-print(f"Light to temperature: {light_to_temperature}")
-print(f"Temperature to humidity: {temperature_to_humidity}")
-print(f"Humidity to location: {humidity_to_location}")
-
-def custom_map(source,m):
-    # print(source)
-    # print(m)
-    if source in m['mapping'].keys():
-        destination = m['mapping'][source]
     else:
-        destination = source
+        intervals.append((x1, x2, level + 1))
 
-    return destination
-
-for seed,d_ in seeds.items():
-    seeds[seed]['soil'] = custom_map(seed,seed_to_soil)
-    seeds[seed]['fertilizer'] = custom_map(seeds[seed]['soil'],soil_to_fertilizer)
-    seeds[seed]['water'] = custom_map(seeds[seed]['fertilizer'],fertilizer_to_water)
-    seeds[seed]['light'] = custom_map(seeds[seed]['water'],water_to_light)
-    seeds[seed]['temperature'] = custom_map(seeds[seed]['light'],light_to_temperature)
-    seeds[seed]['humidity'] = custom_map(seeds[seed]['temperature'],temperature_to_humidity)
-    seeds[seed]['location'] = custom_map(seeds[seed]['humidity'],humidity_to_location)
-    print("********************")
-    print(f"Seed number {seed} corresponds to: \n\tSoil: {seeds[seed]['soil']}\n\tFertilizer: {seeds[seed]['fertilizer']}\n\tWater: {seeds[seed]['water']}\n\tLight: {seeds[seed]['light']}\n\tTemperature: {seeds[seed]['temperature']}\n\tHumidity: {seeds[seed]['humidity']}\n\tLocation: {seeds[seed]['location']}")
-
-print("*****************************")
-print(f"Lowest location number: {min(seed['location'] for n,seed in seeds.items())}")
+    
+print(f"Lowest location is {min_location}")
