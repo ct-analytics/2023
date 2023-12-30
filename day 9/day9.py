@@ -3,35 +3,25 @@ from pprint import pprint
 
 f = 'day 9/day9.txt'
 
-def diffs(l):
-    d = []
-    for i in range(len(l)-1):
-        d.append(l[i+1]-l[i])
-
-    # print(d)
-    return d
+def get_value(h,pos):
+    if all(n==0 for n in h):
+        return 0
+    else:
+        diff = [h[i+1] - h[i] for i in range(len(h)-1)]
+        if pos=="next":
+            return h[-1] + get_value(diff,"next")
+        elif pos=="prev":
+            return h[0] - get_value(diff,"prev")
 
 with open(f,'r') as input:
-    extrapolated_values = []
+    next_values = []
+    previous_values = []
+
     for i, line in enumerate(input):
         readings = [int(x) for x in line.strip().split(" ")]
-        # print(readings)
 
-        d = list()
-        d.append(readings)
-        
-        i = 0
-        while sum(d[i]) != 0:
-            i+=1
-            d.append(diffs(d[i-1]))
+        previous_values.append(get_value(readings,"prev"))
+        next_values.append(get_value(readings,"next"))
 
-        s = sum([x[-1] for x in d])
-        # pprint(d)
-        print(f"Next value is: {s}")
-        extrapolated_values.append(sum([x[-1] for x in d]))
-
-# print(extrapolated_values)
-print(f"Sum of extrapolated values: {sum(extrapolated_values)-1}")
-# 1856890045 too high
-# 1853145120 too high
-# 1853145119
+print(f"Part 1: Sum of extrapolated values: {sum(next_values)}")
+print(f"Part 2: Sum of extrapolated values: {sum(previous_values)}")
